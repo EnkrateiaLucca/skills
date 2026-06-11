@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>{{DECK_TITLE}}</title>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#141823; --ink:#eef1f7;
+    --muted:#8a93a6; --accent:#7cf2c6; --warn:#ff7a7a;
+    --keep:#7cf2c6; --del:#ff7a7a; --border:#222838;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+  .stage{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:18px}
+  .card{
+    width:min(880px,100%); aspect-ratio: 16/10; background:var(--panel);
+    border:1px solid var(--border); border-radius:18px; padding:38px 44px;
+    box-shadow:0 30px 80px rgba(0,0,0,.45);
+    display:flex; flex-direction:column; gap:14px; position:relative; overflow:hidden;
+  }
+  .card.kept{ box-shadow:0 0 0 2px var(--keep), 0 30px 80px rgba(0,0,0,.45) }
+  .card.deleted{ box-shadow:0 0 0 2px var(--del), 0 30px 80px rgba(0,0,0,.45); opacity:.55 }
+  .num{position:absolute;top:18px;right:24px;color:var(--muted);font-size:13px;letter-spacing:.1em}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:3px 10px;align-self:flex-start}
+  h1{font-size:28px;margin:6px 0 0;line-height:1.2}
+  .why{color:var(--muted);font-size:14px;margin:0}
+  .body{font-size:15px;color:#cdd3e1}
+  .body b{color:#fff}
+  ul{margin:6px 0 0 18px;padding:0}
+  li{margin:4px 0}
+  .meta{margin-top:auto;display:flex;gap:18px;color:var(--muted);font-size:12px;flex-wrap:wrap}
+  .meta span b{color:#cdd3e1}
+  .controls{display:flex;gap:10px;align-items:center}
+  button{
+    background:#1b2030;color:var(--ink);border:1px solid var(--border);
+    border-radius:10px;padding:10px 16px;cursor:pointer;font:inherit
+  }
+  button.keep{border-color:var(--keep);color:var(--keep)}
+  button.del{border-color:var(--del);color:var(--del)}
+  button:hover{filter:brightness(1.2)}
+  .nav{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px}
+  .progress{width:min(880px,100%);height:4px;background:#1b2030;border-radius:99px;overflow:hidden}
+  .progress > div{height:100%;background:var(--accent);width:0%;transition:width .25s}
+  .hint{color:var(--muted);font-size:12px}
+  .summary{display:none;width:min(880px,100%);background:var(--panel);
+    border:1px solid var(--border);border-radius:14px;padding:18px}
+  .summary.on{display:block}
+  .summary h3{margin:0 0 10px}
+  .pill{display:inline-block;background:#1b2030;border:1px solid var(--border);
+    border-radius:99px;padding:4px 10px;margin:3px;font-size:12px}
+  .pill.k{border-color:var(--keep);color:var(--keep)}
+  .pill.d{border-color:var(--del);color:var(--del);opacity:.75}
+  a.dl{color:var(--accent);text-decoration:none;border:1px solid var(--accent);
+    border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="progress"><div id="bar"></div></div>
+  <div id="card" class="card"></div>
+  <div class="controls">
+    <button id="prev">← Prev</button>
+    <button class="del"  id="delBtn">✗ Delete (D)</button>
+    <button class="keep" id="keepBtn">✓ Keep (K)</button>
+    <button id="next">Next →</button>
+  </div>
+  <div class="nav">
+    <span class="hint">← / → to swipe · K to keep · D to delete · S for summary</span>
+  </div>
+  <div id="summary" class="summary"></div>
+</div>
+
+<script>
+/* ───────────────────────────────────────────────────────────────
+   DECISION DECK TEMPLATE
+   Replace DECK_TITLE in <title> above and fill the SLIDES array
+   below with one object per option. Field schema (keep these
+   names stable; rename the *labels* in render() if needed):
+
+     tag    – short category (1–2 words, shown as a pill)
+     title  – the option's name
+     why    – one sentence on why this option matters
+     body   – 2–4 sentences describing the option in detail
+     meta1  – first metadata field (e.g. cost, effort, score)
+     meta2  – second metadata field (e.g. risk, deliverable)
+
+   Empty strings are fine for fields that don't apply.
+   ─────────────────────────────────────────────────────────────── */
+const DECK_TITLE = "{{DECK_TITLE}}";
+
+const SLIDES = [
+  {
+    tag:   "Category",
+    title: "Option title goes here",
+    why:   "One sentence on why this option matters or the trade-off it represents.",
+    body:  "Two to four sentences describing the option in concrete detail. What is it, how does it work, what makes it distinct from the others in this deck?",
+    meta1: "First metadata value",
+    meta2: "Second metadata value"
+  },
+  // ... add more options here
+];
+
+/* Labels for the two meta fields. Rename to fit the domain. */
+const META1_LABEL = "Detail";
+const META2_LABEL = "Note";
+
+/* localStorage key — give each deck a unique slug to avoid collisions. */
+const STORAGE = "deck_default_v1";
+
+/* ── tiny app ───────────────────────────────────────────────── */
+let state = JSON.parse(localStorage.getItem(STORAGE) || "{}");
+let i = 0;
+
+const card = document.getElementById("card");
+const bar  = document.getElementById("bar");
+const sum  = document.getElementById("summary");
+
+function render(){
+  const s = SLIDES[i];
+  const status = state[i]; // "keep" | "delete" | undefined
+  card.className = "card" + (status === "keep" ? " kept" : status === "delete" ? " deleted" : "");
+  card.innerHTML = `
+    <div class="num">${String(i+1).padStart(2,"0")} / ${SLIDES.length}</div>
+    ${s.tag ? `<span class="tag">${s.tag}</span>` : ""}
+    <h1>${s.title}</h1>
+    ${s.why ? `<p class="why"><b>Why this matters →</b> ${s.why}</p>` : ""}
+    <div class="body">${s.body || ""}</div>
+    <div class="meta">
+      ${s.meta1 ? `<span><b>${META1_LABEL}:</b> ${s.meta1}</span>` : ""}
+      ${s.meta2 ? `<span><b>${META2_LABEL}:</b> ${s.meta2}</span>` : ""}
+      ${status ? `<span><b>Status:</b> ${status === "keep" ? "✓ kept" : "✗ deleted"}</span>` : ""}
+    </div>
+  `;
+  bar.style.width = ((i+1)/SLIDES.length*100) + "%";
+  renderSummary();
+}
+
+function renderSummary(){
+  const kept = SLIDES.map((s,k)=>({s,k})).filter(x=>state[x.k]==="keep");
+  const del  = SLIDES.map((s,k)=>({s,k})).filter(x=>state[x.k]==="delete");
+  const undecided = SLIDES.length - kept.length - del.length;
+  if (kept.length + del.length === 0){ sum.classList.remove("on"); return; }
+  sum.classList.add("on");
+  const keptJSON = JSON.stringify(kept.map(x=>({n:x.k+1, ...x.s})), null, 2);
+  const md = `# ${DECK_TITLE} — Kept\n\n` +
+    kept.map(x=>`## ${x.k+1}. ${x.s.title}\n\n${x.s.why ? `**Why:** ${x.s.why}\n\n` : ""}${x.s.body || ""}\n\n${x.s.meta1 ? `- ${META1_LABEL}: ${x.s.meta1}\n` : ""}${x.s.meta2 ? `- ${META2_LABEL}: ${x.s.meta2}\n` : ""}`).join("\n");
+  sum.innerHTML = `
+    <h3>Your selections — ${kept.length} kept · ${del.length} deleted · ${undecided} undecided</h3>
+    <div>${kept.map(x=>`<span class="pill k">✓ ${x.k+1}. ${x.s.title}</span>`).join("")}</div>
+    <div>${del .map(x=>`<span class="pill d">✗ ${x.k+1}. ${x.s.title}</span>`).join("")}</div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <a class="dl" id="dlJson">⬇ Download kept.json</a>
+      <a class="dl" id="dlMd">⬇ Download kept.md</a>
+      <a class="dl" id="reset">↺ Reset all</a>
+    </div>
+  `;
+  document.getElementById("dlJson").onclick = ()=>download("kept.json", keptJSON, "application/json");
+  document.getElementById("dlMd").onclick   = ()=>download("kept.md", md, "text/markdown");
+  document.getElementById("reset").onclick  = ()=>{ if(confirm("Clear all selections?")){state={};save();render();} };
+}
+
+function download(name, content, mime){
+  const blob = new Blob([content], {type:mime});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+}
+function save(){ localStorage.setItem(STORAGE, JSON.stringify(state)); }
+function mark(v){ state[i] = v; save(); render(); setTimeout(next, 180); }
+function next(){ if(i<SLIDES.length-1){i++;render();} }
+function prev(){ if(i>0){i--;render();} }
+
+document.getElementById("next").onclick = next;
+document.getElementById("prev").onclick = prev;
+document.getElementById("keepBtn").onclick = ()=>mark("keep");
+document.getElementById("delBtn").onclick  = ()=>mark("delete");
+
+window.addEventListener("keydown", e=>{
+  if (e.key==="ArrowRight") next();
+  else if (e.key==="ArrowLeft") prev();
+  else if (e.key.toLowerCase()==="k") mark("keep");
+  else if (e.key.toLowerCase()==="d") mark("delete");
+  else if (e.key.toLowerCase()==="s") sum.classList.toggle("on");
+});
+
+render();
+</script>
+</body>
+</html>

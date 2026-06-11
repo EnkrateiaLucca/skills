@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Name - Browser Utility</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+            color: #1f2937;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        /* Prevent mobile zoom on input focus */
+        input, textarea, select {
+            font-size: 16px;
+        }
+
+        /* Card container */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #374151;
+        }
+
+        /* Primary button */
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Secondary button */
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Text inputs */
+        textarea, input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            min-height: 150px;
+        }
+
+        /* Select dropdown */
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        /* Label */
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+
+        /* Error display */
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            display: none;
+        }
+
+        .error.visible {
+            display: block;
+        }
+
+        /* Success display */
+        .success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            display: none;
+        }
+
+        .success.visible {
+            display: block;
+        }
+
+        /* Code/output display */
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, 'Consolas', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Output area */
+        #output {
+            margin-top: 16px;
+            display: none;
+        }
+
+        #output.visible {
+            display: block;
+        }
+
+        /* Drag and drop zone */
+        .drop-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .drop-zone input[type="file"] {
+            display: none;
+        }
+
+        .drop-zone p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        /* File list */
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .file-item .remove {
+            background: none;
+            color: #6b7280;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        .file-item .remove:hover {
+            color: #dc2626;
+            background: none;
+        }
+
+        /* Button row */
+        .button-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Settings footer */
+        .settings {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .settings a {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Loading spinner */
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Copy button */
+        .copy-btn {
+            background: #374151;
+            padding: 6px 12px;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* Metadata/stats display */
+        .metadata {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tool Name</h1>
+    <p class="subtitle">Brief description of what this tool does</p>
+
+    <!-- Input Section -->
+    <div class="card">
+        <h2>Input</h2>
+
+        <label for="input-text">Enter your text:</label>
+        <textarea id="input-text" placeholder="Paste or type your content here..."></textarea>
+
+        <!-- Optional: File upload -->
+        <!--
+        <div class="drop-zone" id="drop-zone">
+            <input type="file" id="file-input" accept=".txt,.json,.md" multiple>
+            <p>Drop files here or click to upload</p>
+        </div>
+        <div class="file-list" id="file-list"></div>
+        -->
+
+        <!-- Optional: Model/option selector -->
+        <!--
+        <label for="model-select">Select model:</label>
+        <select id="model-select">
+            <option value="option1">Option 1</option>
+            <option value="option2">Option 2</option>
+        </select>
+        -->
+
+        <div class="button-row">
+            <button id="process-btn" data-original-text="Process">Process</button>
+            <button id="clear-btn" class="btn-secondary">Clear</button>
+        </div>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <!-- Output Section -->
+    <div class="card" id="output">
+        <h2>Output</h2>
+        <pre id="output-content"></pre>
+        <button class="copy-btn" id="copy-btn">Copy to clipboard</button>
+        <div class="metadata" id="metadata"></div>
+    </div>
+
+    <!-- Settings Footer -->
+    <div class="settings">
+        <a href="#" id="reset-key">Reset API key</a>
+    </div>
+
+    <script>
+        // ============================================
+        // API Key Management (localStorage)
+        // ============================================
+
+        const API_KEY_NAME = 'TOOL_API_KEY';  // Change this
+        const PROVIDER_NAME = 'Your Provider'; // Change this
+
+        function getApiKey() {
+            let key = localStorage.getItem(API_KEY_NAME);
+            if (!key) {
+                key = prompt(`Please enter your ${PROVIDER_NAME} API key:`);
+                if (key) {
+                    localStorage.setItem(API_KEY_NAME, key.trim());
+                }
+            }
+            return key;
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem(API_KEY_NAME);
+            location.reload();
+        }
+
+        // ============================================
+        // DOM Elements
+        // ============================================
+
+        const inputText = document.getElementById('input-text');
+        const processBtn = document.getElementById('process-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const errorDiv = document.getElementById('error');
+        const outputDiv = document.getElementById('output');
+        const outputContent = document.getElementById('output-content');
+        const copyBtn = document.getElementById('copy-btn');
+        const metadataDiv = document.getElementById('metadata');
+        const resetKeyLink = document.getElementById('reset-key');
+
+        // ============================================
+        // Utility Functions
+        // ============================================
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.classList.add('visible');
+        }
+
+        function hideError() {
+            errorDiv.classList.remove('visible');
+        }
+
+        function showOutput(content, metadata = '') {
+            outputContent.textContent = content;
+            metadataDiv.textContent = metadata;
+            outputDiv.classList.add('visible');
+        }
+
+        function hideOutput() {
+            outputDiv.classList.remove('visible');
+        }
+
+        function setLoading(isLoading) {
+            processBtn.disabled = isLoading;
+            if (isLoading) {
+                processBtn.classList.add('loading');
+                processBtn.textContent = 'Processing';
+            } else {
+                processBtn.classList.remove('loading');
+                processBtn.textContent = processBtn.dataset.originalText;
+            }
+        }
+
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => copyBtn.textContent = originalText, 2000);
+            } catch (err) {
+                showError('Failed to copy to clipboard');
+            }
+        }
+
+        // ============================================
+        // File Handling (Optional)
+        // ============================================
+
+        /*
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        let uploadedFiles = [];
+
+        function setupDropZone() {
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                handleFiles(Array.from(e.dataTransfer.files));
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(Array.from(e.target.files));
+            });
+        }
+
+        function handleFiles(files) {
+            uploadedFiles = uploadedFiles.concat(files);
+            renderFileList();
+        }
+
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            renderFileList();
+        }
+
+        function renderFileList() {
+            fileList.innerHTML = uploadedFiles.map((file, i) => `
+                <div class="file-item">
+                    <span>${file.name}</span>
+                    <button class="remove" onclick="removeFile(${i})">×</button>
+                </div>
+            `).join('');
+        }
+
+        async function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        async function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        */
+
+        // ============================================
+        // URL State Persistence (Optional)
+        // ============================================
+
+        /*
+        function saveStateToUrl(state) {
+            const params = new URLSearchParams(state);
+            history.replaceState(null, '', '?' + params.toString());
+        }
+
+        function loadStateFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return Object.fromEntries(params.entries());
+        }
+        */
+
+        // ============================================
+        // Main Processing Logic
+        // ============================================
+
+        async function process() {
+            const input = inputText.value.trim();
+
+            if (!input) {
+                showError('Please enter some text');
+                return;
+            }
+
+            hideError();
+            setLoading(true);
+
+            try {
+                // Get API key if needed
+                // const apiKey = getApiKey();
+                // if (!apiKey) {
+                //     showError('API key is required');
+                //     return;
+                // }
+
+                const startTime = performance.now();
+
+                // ========================================
+                // YOUR PROCESSING LOGIC HERE
+                // ========================================
+                // Example: Simple text transformation
+                const result = input.toUpperCase();
+
+                // Example: API call
+                // const response = await fetch('https://api.example.com/process', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'Authorization': `Bearer ${apiKey}`
+                //     },
+                //     body: JSON.stringify({ text: input })
+                // });
+                //
+                // if (!response.ok) {
+                //     const error = await response.json();
+                //     throw new Error(error.message || 'API call failed');
+                // }
+                //
+                // const data = await response.json();
+                // const result = data.output;
+
+                const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+
+                showOutput(result, `Processed in ${elapsed}s`);
+
+            } catch (err) {
+                showError(err.message || 'An error occurred');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // ============================================
+        // Event Listeners
+        // ============================================
+
+        processBtn.addEventListener('click', process);
+
+        clearBtn.addEventListener('click', () => {
+            inputText.value = '';
+            hideError();
+            hideOutput();
+        });
+
+        copyBtn.addEventListener('click', () => {
+            copyToClipboard(outputContent.textContent);
+        });
+
+        resetKeyLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Reset your stored API key?')) {
+                clearApiKey();
+            }
+        });
+
+        // Enter key to submit (Ctrl+Enter or Cmd+Enter)
+        inputText.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                process();
+            }
+        });
+
+        // Initialize file handling if enabled
+        // setupDropZone();
+
+        // Load state from URL if using URL persistence
+        // const savedState = loadStateFromUrl();
+        // if (savedState.input) inputText.value = savedState.input;
+    </script>
+</body>
+</html>

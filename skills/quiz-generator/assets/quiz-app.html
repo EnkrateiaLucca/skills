@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App | Automata Learning Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════════════════════
+           AUTOMATA LEARNING LAB - Brand Design System
+           ═══════════════════════════════════════════════════════════════ */
+
+        /* CSS Custom Properties - Brand Tokens */
+        :root {
+            /* Primary Colors */
+            --ink-black: #000000;
+            --warm-cream: #F5F3EB;
+
+            /* Accent Colors */
+            --coral: #E86B5A;
+            --golden: #F5C542;
+            --sage: #7CB56B;
+            --sky: #5B9BD5;
+
+            /* Accent Tints (Backgrounds) */
+            --coral-light: #FBEAE7;
+            --golden-light: #FEF8E6;
+            --sage-light: #EEF5EC;
+            --sky-light: #E8F1F9;
+
+            /* Neutral Grays */
+            --gray-100: #F5F4F1;
+            --gray-300: #DDD9D2;
+            --gray-500: #8A847A;
+            --gray-600: #5C5750;
+            --gray-800: #2A2825;
+
+            /* Spacing Scale */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 40px;
+
+            /* Typography */
+            --font-primary: 'IBM Plex Sans', Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Monaco', 'Courier New', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            line-height: 1.6;
+            color: var(--gray-800);
+            min-height: 100vh;
+            background-color: var(--warm-cream);
+            padding: var(--space-xl) var(--space-lg);
+        }
+
+        .container {
+            background-color: #ffffff;
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            padding: var(--space-xl);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--ink-black);
+            text-align: center;
+            margin-bottom: var(--space-sm);
+            font-size: 2.5em;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        h2 {
+            color: var(--ink-black);
+            font-size: 1.5em;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: var(--space-md);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--gray-600);
+            margin-bottom: var(--space-xl);
+            font-size: 1.1em;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-section {
+            background-color: var(--gray-100);
+            border: 2px dashed var(--ink-black);
+            border-radius: 0;
+            padding: var(--space-xl);
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            transition: all 0.2s ease;
+        }
+
+        .upload-section:hover {
+            background-color: var(--sky-light);
+            border-color: var(--sky);
+        }
+
+        /* Button Base Styles */
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 4px 4px 0 var(--ink-black);
+        }
+
+        .btn:active {
+            transform: translateY(-2px);
+            box-shadow: 2px 2px 0 var(--ink-black);
+        }
+
+        /* Primary Button - Black fill */
+        .btn-primary {
+            background-color: var(--ink-black);
+            color: #ffffff;
+        }
+
+        /* Secondary Button - White fill with border */
+        .btn-secondary {
+            background-color: #ffffff;
+            color: var(--ink-black);
+        }
+
+        /* Accent Button - Coral for CTAs */
+        .btn-accent {
+            background-color: var(--coral);
+            color: #ffffff;
+            border-color: var(--ink-black);
+        }
+
+        /* Info Button - Sky Blue */
+        .btn-info {
+            background-color: var(--sky);
+            color: #ffffff;
+            border-color: var(--ink-black);
+        }
+
+        /* Success Button - Sage Green */
+        .btn-success {
+            background-color: var(--sage);
+            color: #ffffff;
+            border-color: var(--ink-black);
+        }
+
+        /* Warning Button - Golden */
+        .btn-warning {
+            background-color: var(--golden);
+            color: var(--ink-black);
+            border-color: var(--ink-black);
+        }
+
+        .btn:disabled {
+            background-color: var(--gray-300);
+            color: var(--gray-500);
+            border-color: var(--gray-500);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .file-upload {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: var(--ink-black);
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .file-upload:hover {
+            transform: translateY(-4px);
+            box-shadow: 4px 4px 0 var(--gray-600);
+        }
+
+        button {
+            padding: 14px 28px;
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background-color: var(--sage);
+            color: #ffffff;
+            margin-left: var(--space-md);
+        }
+
+        button:hover {
+            transform: translateY(-4px);
+            box-shadow: 4px 4px 0 var(--ink-black);
+        }
+
+        button:active {
+            transform: translateY(-2px);
+            box-shadow: 2px 2px 0 var(--ink-black);
+        }
+
+        button:disabled {
+            background-color: var(--gray-300);
+            color: var(--gray-500);
+            border-color: var(--gray-500);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #questionContainer, #resultContainer {
+            margin-top: var(--space-lg);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+
+        .option {
+            padding: var(--space-md);
+            background-color: #ffffff;
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-primary);
+        }
+
+        .option:hover {
+            background-color: var(--sky-light);
+            transform: translateY(-2px);
+            box-shadow: 2px 2px 0 var(--ink-black);
+        }
+
+        .option.selected {
+            background-color: var(--sky);
+            border-color: var(--ink-black);
+            color: #ffffff;
+            box-shadow: 4px 4px 0 var(--ink-black);
+        }
+
+        /* Feedback Callouts - Using Brand Accent Colors */
+        .feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: 0;
+            border-left: 4px solid;
+        }
+
+        .correct {
+            background-color: var(--sage-light);
+            border-color: var(--sage);
+            color: var(--gray-800);
+        }
+
+        .correct strong {
+            color: var(--sage);
+        }
+
+        .incorrect {
+            background-color: var(--coral-light);
+            border-color: var(--coral);
+            color: var(--gray-800);
+        }
+
+        .incorrect strong {
+            color: var(--coral);
+        }
+
+        .skipped {
+            background-color: var(--golden-light);
+            border-color: var(--golden);
+            color: var(--gray-800);
+        }
+
+        .skipped strong {
+            color: #9a7b0a;
+        }
+
+        .skip-btn {
+            padding: 14px 24px;
+            background-color: var(--golden);
+            color: var(--ink-black);
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: var(--space-sm);
+        }
+
+        .skip-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 4px 4px 0 var(--ink-black);
+        }
+
+        .skip-btn:active {
+            transform: translateY(-2px);
+            box-shadow: 2px 2px 0 var(--ink-black);
+        }
+
+        .answer-section {
+            margin-top: var(--space-lg);
+            width: 100%;
+        }
+
+        .answer-label {
+            display: block;
+            margin-bottom: var(--space-sm);
+            font-weight: 600;
+            color: var(--gray-800);
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85em;
+        }
+
+        .open-ended-answer {
+            width: 100%;
+            min-height: 120px;
+            padding: var(--space-md);
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            font-family: var(--font-primary);
+            font-size: 1em;
+            resize: vertical;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .open-ended-answer:focus {
+            border-color: var(--sky);
+            outline: none;
+            box-shadow: 4px 4px 0 var(--sky-light);
+        }
+
+        .example-box {
+            background-color: #ffffff;
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            margin-top: var(--space-lg);
+        }
+
+        .example-box summary {
+            color: var(--ink-black);
+            font-weight: 700;
+            padding: var(--space-md) var(--space-lg);
+            font-size: 1.1em;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s ease;
+        }
+
+        .example-box summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .example-box summary::after {
+            content: '+';
+            font-size: 1.5em;
+            font-weight: 700;
+            transition: transform 0.2s ease;
+        }
+
+        .example-box[open] summary::after {
+            content: '−';
+        }
+
+        .example-box summary:hover {
+            background-color: var(--gray-100);
+        }
+
+        .example-box .example-content {
+            padding: var(--space-lg);
+            border-top: 2px solid var(--gray-300);
+        }
+
+        .example-title {
+            color: var(--ink-black);
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            font-size: 1.1em;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding-bottom: var(--space-sm);
+            border-bottom: 2px solid var(--gray-300);
+        }
+
+        .json-example {
+            background-color: var(--gray-800);
+            color: var(--warm-cream);
+            padding: var(--space-lg);
+            border: 2px solid var(--ink-black);
+            border-radius: 0;
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.8;
+        }
+
+        .json-key {
+            color: var(--sky);
+            font-weight: 500;
+        }
+
+        .json-string {
+            color: var(--sage);
+        }
+
+        .json-number {
+            color: var(--coral);
+            font-weight: 500;
+        }
+
+        /* Results Page Button Variations */
+        #retakeSameQuiz {
+            background-color: var(--sky);
+        }
+
+        #loadNewQuiz {
+            background-color: var(--coral);
+        }
+
+        #downloadCSV {
+            background-color: var(--ink-black);
+        }
+
+        #downloadMD {
+            background-color: var(--sage);
+        }
+
+        #exportToAnki {
+            background-color: var(--golden);
+            color: var(--ink-black);
+        }
+
+        /* Score Display - Hierarchical Design */
+        .score-display {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background-color: var(--gray-100);
+            border: 2px solid var(--ink-black);
+        }
+
+        .score-display .score-label {
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85em;
+            color: var(--gray-600);
+            margin-bottom: var(--space-sm);
+        }
+
+        #score {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 3em;
+            color: var(--ink-black);
+            display: block;
+        }
+
+        .score-subtext {
+            font-size: 0.9em;
+            color: var(--gray-500);
+            margin-top: var(--space-xs);
+        }
+
+        /* Results Sections */
+        .results-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .results-section-title {
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8em;
+            color: var(--gray-500);
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px solid var(--gray-300);
+        }
+
+        /* Enhanced Feedback Cards with Status Badges */
+        .feedback .status-badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 8px;
+            margin-left: var(--space-sm);
+            border: 1px solid;
+        }
+
+        .feedback.correct .status-badge {
+            background-color: var(--sage);
+            color: white;
+            border-color: var(--sage);
+        }
+
+        .feedback.incorrect .status-badge {
+            background-color: var(--coral);
+            color: white;
+            border-color: var(--coral);
+        }
+
+        .feedback.skipped .status-badge {
+            background-color: var(--golden);
+            color: var(--ink-black);
+            border-color: var(--golden);
+        }
+
+        /* Selection Controls */
+        .selection-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+            padding: var(--space-sm) 0;
+        }
+
+        .select-all-label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-family: var(--font-mono);
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-600);
+            cursor: pointer;
+        }
+
+        .selection-count {
+            font-family: var(--font-mono);
+            font-size: 0.75em;
+            color: var(--gray-500);
+        }
+
+        .feedback-checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+        }
+
+        .feedback-checkbox-wrapper input[type="checkbox"] {
+            margin-top: 6px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--ink-black);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .feedback-checkbox-wrapper .feedback {
+            flex: 1;
+        }
+
+        /* Button Groups */
+        .button-group-primary {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .button-group-secondary {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .button-group-secondary button {
+            padding: 10px 16px;
+            font-size: 0.8em;
+        }
+
+        .button-group-label {
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.7em;
+            color: var(--gray-500);
+            margin-bottom: var(--space-sm);
+            display: block;
+        }
+
+        /* Question Progress */
+        .question-progress {
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            color: var(--gray-600);
+            margin-bottom: var(--space-md);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Button Row */
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            align-items: center;
+        }
+
+        /* Question Feedback */
+        #questionFeedback {
+            margin-top: var(--space-lg);
+            padding: var(--space-md);
+            border-radius: 0;
+            border-left: 4px solid;
+        }
+
+        #questionFeedback.correct {
+            background-color: var(--sage-light);
+            border-color: var(--sage);
+        }
+
+        #questionFeedback.incorrect {
+            background-color: var(--coral-light);
+            border-color: var(--coral);
+        }
+
+        #questionFeedback.skipped {
+            background-color: var(--golden-light);
+            border-color: var(--golden);
+        }
+
+        #questionFeedback .feedback-title {
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+
+        #questionFeedback.correct .feedback-title {
+            color: var(--sage);
+        }
+
+        #questionFeedback.incorrect .feedback-title {
+            color: var(--coral);
+        }
+
+        #questionFeedback.skipped .feedback-title {
+            color: #9a7b0a;
+        }
+
+        /* Source URL Link Styling */
+        .source-link {
+            color: var(--sky);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s ease;
+        }
+
+        .source-link:hover {
+            border-bottom-color: var(--sky);
+        }
+
+        .source-link::after {
+            content: ' ↗';
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: var(--space-lg) var(--space-md);
+            }
+
+            .container {
+                padding: var(--space-lg);
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .upload-section {
+                padding: var(--space-lg);
+            }
+
+            .file-upload, button {
+                display: block;
+                width: 100%;
+                margin: var(--space-sm) 0;
+            }
+
+            button {
+                margin-left: 0;
+            }
+
+            .options {
+                grid-template-columns: 1fr;
+            }
+
+            .json-example {
+                font-size: 0.75em;
+                padding: var(--space-md);
+            }
+
+            .skip-btn {
+                display: block;
+                width: 100%;
+                margin: var(--space-sm) 0;
+                margin-left: 0;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            .button-row button {
+                width: 100%;
+                margin: var(--space-xs) 0;
+            }
+
+            #prevQuestion {
+                order: 3;
+            }
+
+            .button-group-primary {
+                flex-direction: column;
+            }
+
+            .button-group-primary button {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .button-group-secondary button {
+                flex: 1;
+                min-width: 80px;
+            }
+
+            #score {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="initialPage">
+            <h1>Quiz App</h1>
+            <p class="subtitle">Test your knowledge with custom JSON-based quizzes</p>
+
+            <div class="upload-section">
+                <label for="fileInput" class="file-upload">
+                    Choose Quiz File
+                </label>
+                <input type="file" id="fileInput" accept=".json,.txt">
+                <button id="startQuiz" disabled>Start Quiz</button>
+            </div>
+
+            <details class="example-box">
+                <summary>Expected JSON File Format</summary>
+                <div class="example-content">
+                    <div class="json-example">[
+  {
+    <span class="json-key">"question"</span>: <span class="json-string">"What is the capital of France?"</span>,
+    <span class="json-key">"type"</span>: <span class="json-string">"multiple-choice"</span>,
+    <span class="json-key">"options"</span>: [<span class="json-string">"London"</span>, <span class="json-string">"Berlin"</span>, <span class="json-string">"Paris"</span>, <span class="json-string">"Madrid"</span>],
+    <span class="json-key">"correctAnswer"</span>: <span class="json-number">2</span>,
+    <span class="json-key">"explanation"</span>: <span class="json-string">"Paris has been the capital since 987 AD."</span>,
+    <span class="json-key">"sourceUrl"</span>: <span class="json-string">"https://en.wikipedia.org/wiki/Paris"</span>
+  },
+  {
+    <span class="json-key">"question"</span>: <span class="json-string">"What is 2 + 2?"</span>,
+    <span class="json-key">"type"</span>: <span class="json-string">"open-ended"</span>,
+    <span class="json-key">"acceptedAnswers"</span>: [<span class="json-string">"4"</span>, <span class="json-string">"four"</span>],
+    <span class="json-key">"explanation"</span>: <span class="json-string">"Basic addition: 2+2=4"</span>
+  }
+]</div>
+                </div>
+            </details>
+        </div>
+
+        <div id="questionContainer" style="display: none;">
+            <div class="question-progress">
+                <span id="questionProgress"></span>
+            </div>
+            <h2 id="question"></h2>
+            <div class="options" id="options"></div>
+            <div id="questionFeedback" style="display: none;"></div>
+            <div class="button-row" style="margin-top: 20px;">
+                <button id="prevQuestion" class="btn-secondary">← Previous</button>
+                <button id="submit">Submit</button>
+                <button id="skipQuestion" class="skip-btn">Skip →</button>
+                <button id="nextQuestion" class="btn-info" style="display: none;">Next Question →</button>
+            </div>
+        </div>
+        <div id="resultContainer" style="display: none;">
+            <h2>Quiz Results</h2>
+
+            <div class="score-display">
+                <div class="score-label">Your Score</div>
+                <span id="score"></span>
+                <div id="scoreSubtext" class="score-subtext"></div>
+            </div>
+
+            <div class="results-section">
+                <div class="results-section-title">Question Breakdown</div>
+                <div id="feedback"></div>
+            </div>
+
+            <div class="results-section">
+                <div class="results-section-title">Actions</div>
+                <div class="button-group-primary">
+                    <button id="retakeSameQuiz">Retake Quiz</button>
+                    <button id="loadNewQuiz">New Quiz</button>
+                </div>
+                <span class="button-group-label">Export Results</span>
+                <div class="button-group-secondary">
+                    <button id="downloadCSV">CSV</button>
+                    <button id="downloadMD">LLM Review</button>
+                    <button id="exportToAnki">Anki Cards</button>
+                </div>
+            </div>
+        </div>
+
+    <script>
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let results = [];
+        let answeredQuestions = new Set(); // Track which questions have been answered
+
+        const fileInput = document.getElementById('fileInput');
+        const startQuiz = document.getElementById('startQuiz');
+        const initialPage = document.getElementById('initialPage');
+        const questionContainer = document.getElementById('questionContainer');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const submitButton = document.getElementById('submit');
+        const resultContainer = document.getElementById('resultContainer');
+        const scoreElement = document.getElementById('score');
+        const feedbackElement = document.getElementById('feedback');
+        const downloadCSV = document.getElementById('downloadCSV');
+
+        const retakeSameQuiz = document.getElementById('retakeSameQuiz');
+        const loadNewQuiz = document.getElementById('loadNewQuiz');
+        const downloadMD = document.getElementById('downloadMD');
+        const skipQuestion = document.getElementById('skipQuestion');
+        const nextQuestion = document.getElementById('nextQuestion');
+        const prevQuestion = document.getElementById('prevQuestion');
+        const questionFeedback = document.getElementById('questionFeedback');
+        const questionProgress = document.getElementById('questionProgress');
+
+        fileInput.addEventListener('change', handleFileUpload);
+        startQuiz.addEventListener('click', startQuizHandler);
+        submitButton.addEventListener('click', submitAnswer);
+        downloadCSV.addEventListener('click', downloadResults);
+        retakeSameQuiz.addEventListener('click', retakeSameQuizHandler);
+        loadNewQuiz.addEventListener('click', loadNewQuizHandler);
+        downloadMD.addEventListener('click', downloadMarkdownResults);
+        skipQuestion.addEventListener('click', skipQuestionHandler);
+        nextQuestion.addEventListener('click', goToNextQuestion);
+        prevQuestion.addEventListener('click', goToPrevQuestion);
+
+        // Auto-load quiz from URL hash: #quiz=<base64-json>&autostart=1
+        // Hash is used (not query) so it works with file:// URLs and isn't sent over network.
+        function autoLoadFromHash() {
+            if (!window.location.hash) return;
+            const params = new URLSearchParams(window.location.hash.slice(1));
+            const encoded = params.get('quiz');
+            if (!encoded) return;
+            try {
+                const json = decodeURIComponent(escape(atob(encoded)));
+                const parsed = JSON.parse(json);
+                if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('empty');
+                questions = parsed;
+                startQuiz.disabled = false;
+                if (params.get('autostart') === '1') {
+                    startQuizHandler();
+                }
+            } catch (err) {
+                console.error('Failed to auto-load quiz from URL hash:', err);
+            }
+        }
+        autoLoadFromHash();
+        // Also handle hash changes when the tab is already open and `open` just refocuses it.
+        window.addEventListener('hashchange', autoLoadFromHash);
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    questions = JSON.parse(e.target.result);
+                    startQuiz.disabled = false;
+                } catch (error) {
+                    alert('Error parsing file. Please ensure it\'s a valid JSON.');
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        function startQuizHandler() {
+            currentQuestion = 0;
+            score = 0;
+            results = [];
+            answeredQuestions = new Set();
+            initialPage.style.display = 'none';
+            questionContainer.style.display = 'block';
+            resultContainer.style.display = 'none';
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            const isAnswered = answeredQuestions.has(currentQuestion);
+
+            // Update progress indicator
+            questionProgress.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            questionElement.textContent = question.question;
+            optionsElement.innerHTML = '';
+
+            // Reset feedback area
+            questionFeedback.style.display = 'none';
+            questionFeedback.className = '';
+            questionFeedback.innerHTML = '';
+
+            // Update navigation buttons
+            prevQuestion.style.display = currentQuestion > 0 ? 'inline-block' : 'none';
+
+            // If already answered, show feedback and hide submit/skip
+            if (isAnswered) {
+                const result = results.find(r => r.questionIndex === currentQuestion);
+                if (result) {
+                    showFeedback(result.isCorrect, result.skipped, result.correctAnswer, question.explanation, result.sourceUrl);
+                }
+                submitButton.style.display = 'none';
+                skipQuestion.style.display = 'none';
+                nextQuestion.style.display = currentQuestion < questions.length - 1 ? 'inline-block' : 'none';
+
+                // Show "See Results" if on last question and answered
+                if (currentQuestion === questions.length - 1) {
+                    nextQuestion.textContent = 'See Results →';
+                    nextQuestion.style.display = 'inline-block';
+                }
+            } else {
+                submitButton.style.display = 'inline-block';
+                skipQuestion.style.display = 'inline-block';
+                nextQuestion.style.display = 'none';
+            }
+
+            if (question.type === 'multiple-choice') {
+                // Display multiple choice options
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('div');
+                    button.className = 'option';
+                    button.textContent = option;
+                    if (!isAnswered) {
+                        button.addEventListener('click', () => selectOption(button));
+                    } else {
+                        button.style.cursor = 'default';
+                        // Highlight the user's answer and correct answer
+                        const result = results.find(r => r.questionIndex === currentQuestion);
+                        if (result && option === result.userAnswer) {
+                            button.classList.add('selected');
+                        }
+                    }
+                    optionsElement.appendChild(button);
+                });
+            } else if (question.type === 'open-ended') {
+                // Create answer section container
+                const answerSection = document.createElement('div');
+                answerSection.className = 'answer-section';
+
+                // Add label for clarity
+                const label = document.createElement('label');
+                label.textContent = 'Your Answer:';
+                label.className = 'answer-label';
+
+                // Create textarea for answer
+                const textArea = document.createElement('textarea');
+                textArea.className = 'open-ended-answer';
+                textArea.placeholder = 'Type your answer here...';
+
+                if (isAnswered) {
+                    const result = results.find(r => r.questionIndex === currentQuestion);
+                    textArea.value = result ? result.userAnswer : '';
+                    textArea.disabled = true;
+                }
+
+                // Append elements
+                answerSection.appendChild(label);
+                answerSection.appendChild(textArea);
+                optionsElement.appendChild(answerSection);
+            }
+        }
+
+        function showFeedback(isCorrect, skipped, correctAnswer, explanation, sourceUrl) {
+            let feedbackClass = isCorrect ? 'correct' : (skipped ? 'skipped' : 'incorrect');
+            let title = isCorrect ? 'Correct!' : (skipped ? 'Skipped' : 'Incorrect');
+
+            questionFeedback.className = feedbackClass;
+            questionFeedback.innerHTML = `
+                <div class="feedback-title">${title}</div>
+                <p><strong>Correct answer:</strong> ${correctAnswer}</p>
+                ${explanation ? `<p><strong>Explanation:</strong> ${explanation}</p>` : ''}
+                ${sourceUrl ? `<p><strong>Source:</strong> <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" class="source-link">${sourceUrl}</a></p>` : ''}
+            `;
+            questionFeedback.style.display = 'block';
+        }
+
+        function selectOption(selectedOption) {
+            const options = optionsElement.getElementsByClassName('option');
+            for (let option of options) {
+                option.classList.remove('selected');
+            }
+            selectedOption.classList.add('selected');
+        }
+
+        function submitAnswer() {
+            const question = questions[currentQuestion];
+            let isCorrect = false;
+            let userAnswer = '';
+            let correctAnswer = '';
+
+            if (question.type === 'multiple-choice') {
+                const selectedOption = optionsElement.querySelector('.option.selected');
+                if (!selectedOption) {
+                    alert('Please select an answer');
+                    return;
+                }
+                const selectedAnswer = Array.from(optionsElement.children).indexOf(selectedOption);
+                isCorrect = selectedAnswer === question.correctAnswer;
+                userAnswer = question.options[selectedAnswer];
+                correctAnswer = question.options[question.correctAnswer];
+            } else if (question.type === 'open-ended') {
+                const textArea = optionsElement.querySelector('.open-ended-answer');
+                if (!textArea || !textArea.value.trim()) {
+                    alert('Please enter an answer');
+                    return;
+                }
+                userAnswer = textArea.value.trim();
+                isCorrect = question.acceptedAnswers.some(answer =>
+                    userAnswer.toLowerCase() === answer.toLowerCase()
+                );
+                correctAnswer = question.acceptedAnswers.join(' OR ');
+                textArea.disabled = true;
+            }
+
+            if (isCorrect) score++;
+
+            // Mark question as answered
+            answeredQuestions.add(currentQuestion);
+
+            results.push({
+                questionIndex: currentQuestion,
+                question: question.question,
+                userAnswer: userAnswer,
+                correctAnswer: correctAnswer,
+                isCorrect: isCorrect,
+                skipped: false,
+                explanation: question.explanation || null,
+                sourceUrl: question.sourceUrl || null,
+                type: question.type
+            });
+
+            // Show feedback immediately
+            showFeedback(isCorrect, false, correctAnswer, question.explanation, question.sourceUrl);
+
+            // Update button visibility
+            submitButton.style.display = 'none';
+            skipQuestion.style.display = 'none';
+
+            if (currentQuestion < questions.length - 1) {
+                nextQuestion.textContent = 'Next Question →';
+                nextQuestion.style.display = 'inline-block';
+            } else {
+                nextQuestion.textContent = 'See Results →';
+                nextQuestion.style.display = 'inline-block';
+            }
+        }
+
+        function skipQuestionHandler() {
+            const question = questions[currentQuestion];
+            const correctAnswer = question.type === 'multiple-choice'
+                ? question.options[question.correctAnswer]
+                : question.acceptedAnswers.join(' OR ');
+
+            // Mark question as answered
+            answeredQuestions.add(currentQuestion);
+
+            results.push({
+                questionIndex: currentQuestion,
+                question: question.question,
+                userAnswer: "Skipped",
+                correctAnswer: correctAnswer,
+                isCorrect: false,
+                skipped: true,
+                explanation: question.explanation || null,
+                sourceUrl: question.sourceUrl || null,
+                type: question.type
+            });
+
+            // Show feedback immediately
+            showFeedback(false, true, correctAnswer, question.explanation, question.sourceUrl);
+
+            // Disable textarea if open-ended
+            const textArea = optionsElement.querySelector('.open-ended-answer');
+            if (textArea) textArea.disabled = true;
+
+            // Update button visibility
+            submitButton.style.display = 'none';
+            skipQuestion.style.display = 'none';
+
+            if (currentQuestion < questions.length - 1) {
+                nextQuestion.textContent = 'Next Question →';
+                nextQuestion.style.display = 'inline-block';
+            } else {
+                nextQuestion.textContent = 'See Results →';
+                nextQuestion.style.display = 'inline-block';
+            }
+        }
+
+        function goToNextQuestion() {
+            // Check if all questions are answered
+            if (answeredQuestions.size === questions.length) {
+                showResults();
+                return;
+            }
+
+            // Move to next question
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            } else {
+                // If we're on the last question, show results
+                showResults();
+            }
+        }
+
+        function goToPrevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function showResults() {
+            questionContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            const skippedCount = results.filter(r => r.skipped).length;
+            const incorrectCount = results.filter(r => !r.isCorrect && !r.skipped).length;
+            const percentage = Math.round((score / questions.length) * 100);
+
+            // Update score display
+            scoreElement.textContent = `${score} / ${questions.length}`;
+
+            // Build subtext with percentage and stats
+            const subtextElement = document.getElementById('scoreSubtext');
+            let subtextParts = [`${percentage}%`];
+            if (skippedCount > 0) subtextParts.push(`${skippedCount} skipped`);
+            if (incorrectCount > 0) subtextParts.push(`${incorrectCount} incorrect`);
+            subtextElement.textContent = subtextParts.join(' · ');
+
+            // Sort results by question index for proper display order
+            const sortedResults = [...results].sort((a, b) => a.questionIndex - b.questionIndex);
+
+            // Add selection controls
+            const selectionControls = `
+                <div class="selection-controls">
+                    <label class="select-all-label">
+                        <input type="checkbox" id="selectAllQuestions" checked onchange="toggleSelectAll(this)">
+                        Select All
+                    </label>
+                    <span class="selection-count" id="selectionCount">${sortedResults.length} of ${sortedResults.length} selected</span>
+                </div>
+            `;
+
+            feedbackElement.innerHTML = selectionControls + sortedResults.map((result) => {
+                let feedbackClass = result.isCorrect ? 'correct' : (result.skipped ? 'skipped' : 'incorrect');
+                let badgeText = result.isCorrect ? 'Correct' : (result.skipped ? 'Skipped' : 'Incorrect');
+                return `
+                <div class="feedback-checkbox-wrapper">
+                    <input type="checkbox" class="question-select" data-index="${result.questionIndex}" checked onchange="updateSelectionCount()">
+                    <div class="feedback ${feedbackClass}">
+                        <p><strong>Question ${result.questionIndex + 1}</strong><span class="status-badge">${badgeText}</span></p>
+                        <p>${result.question}</p>
+                        <p>Your answer: ${result.userAnswer}</p>
+                        <p>Correct answer: ${result.correctAnswer}</p>
+                        ${result.sourceUrl ? `<p>Source: <a href="${result.sourceUrl}" target="_blank" rel="noopener noreferrer" class="source-link">${result.sourceUrl}</a></p>` : ''}
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function toggleSelectAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.question-select');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+            updateSelectionCount();
+        }
+
+        function updateSelectionCount() {
+            const checkboxes = document.querySelectorAll('.question-select');
+            const checked = document.querySelectorAll('.question-select:checked');
+            const selectAll = document.getElementById('selectAllQuestions');
+            const countEl = document.getElementById('selectionCount');
+
+            if (selectAll) selectAll.checked = checked.length === checkboxes.length;
+            if (countEl) countEl.textContent = `${checked.length} of ${checkboxes.length} selected`;
+        }
+
+        function getSelectedResults() {
+            const checked = document.querySelectorAll('.question-select:checked');
+            const selectedIndices = new Set(Array.from(checked).map(cb => parseInt(cb.dataset.index)));
+            return results.filter(r => selectedIndices.has(r.questionIndex))
+                          .sort((a, b) => a.questionIndex - b.questionIndex);
+        }
+
+        function downloadResults() {
+            const selected = getSelectedResults();
+            if (selected.length === 0) { alert('No questions selected for export.'); return; }
+
+            const csvContent = "data:text/csv;charset=utf-8,"
+                + "Question,Your Answer,Correct Answer,Result\n"
+                + selected.map(r => {
+                    const status = r.isCorrect ? "Correct" : (r.skipped ? "Skipped" : "Incorrect");
+                    return `"${r.question}","${r.userAnswer}","${r.correctAnswer}",${status}`;
+                }).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "quiz_results.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+        // Add the new event listener with the other listeners
+        const exportAnki = document.getElementById('exportToAnki');
+        exportAnki.addEventListener('click', downloadAnkiFormat);
+
+        // Add this new function before the closing script tag
+        function downloadAnkiFormat() {
+            const selected = getSelectedResults();
+            if (selected.length === 0) { alert('No questions selected for export.'); return; }
+
+            const ankiContent = "data:text/plain;charset=utf-8,"
+                + selected.map(r => `${r.question}; ${r.correctAnswer}`).join("\n");
+
+            const encodedUri = encodeURI(ankiContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "anki_cards.txt");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        function retakeSameQuizHandler() {
+            currentQuestion = 0;
+            score = 0;
+            results = [];
+            answeredQuestions = new Set();
+            resultContainer.style.display = 'none';
+            questionContainer.style.display = 'block';
+            displayQuestion();
+        }
+
+        function loadNewQuizHandler() {
+            questions = [];
+            currentQuestion = 0;
+            score = 0;
+            results = [];
+            answeredQuestions = new Set();
+            fileInput.value = '';
+            startQuiz.disabled = true;
+            resultContainer.style.display = 'none';
+            questionContainer.style.display = 'none';
+            initialPage.style.display = 'block';
+        }
+
+        function downloadMarkdownResults() {
+            const selected = getSelectedResults();
+            if (selected.length === 0) { alert('No questions selected for export.'); return; }
+
+            const date = new Date().toISOString().split('T')[0];
+            const selectedScore = selected.filter(r => r.isCorrect).length;
+            const percentage = ((selectedScore / selected.length) * 100).toFixed(1);
+
+            let mdContent = `# Quiz Results\n\n`;
+            mdContent += `**Date:** ${date}\n`;
+            mdContent += `**Score:** ${selectedScore}/${selected.length} (${percentage}%)\n\n`;
+            mdContent += `---\n\n`;
+            mdContent += `## Summary for LLM Review\n\n`;
+            mdContent += `Please review my quiz results and provide feedback on:\n`;
+            mdContent += `1. Areas where I need improvement (incorrect answers)\n`;
+            mdContent += `2. Patterns in my mistakes\n`;
+            mdContent += `3. Suggested study topics based on my performance\n\n`;
+            mdContent += `---\n\n`;
+            mdContent += `## Detailed Results\n\n`;
+
+            selected.forEach((r) => {
+                const status = r.isCorrect ? '✅ Correct' : (r.skipped ? '🟡 Skipped' : '❌ Incorrect');
+                mdContent += `### Question ${r.questionIndex + 1}: ${status}\n\n`;
+                mdContent += `**Question:** ${r.question}\n\n`;
+                mdContent += `**Your Answer:** ${r.userAnswer}\n\n`;
+                mdContent += `**Correct Answer:** ${r.correctAnswer}\n\n`;
+                if (r.explanation) {
+                    mdContent += `**Explanation:** ${r.explanation}\n\n`;
+                }
+                mdContent += `---\n\n`;
+            });
+
+            // Add skipped questions summary
+            const skippedResults = selected.filter(r => r.skipped);
+            if (skippedResults.length > 0) {
+                mdContent += `## Questions You Skipped (Need to Learn)\n\n`;
+                skippedResults.forEach((r, index) => {
+                    mdContent += `${index + 1}. **${r.question}**\n`;
+                    mdContent += `   - Correct: ${r.correctAnswer}\n`;
+                    if (r.explanation) {
+                        mdContent += `   - Why: ${r.explanation}\n`;
+                    }
+                    mdContent += `\n`;
+                });
+            }
+
+            // Add incorrect questions summary at the end
+            const incorrectResults = selected.filter(r => !r.isCorrect && !r.skipped);
+            if (incorrectResults.length > 0) {
+                mdContent += `## Questions to Review (Incorrect Answers)\n\n`;
+                incorrectResults.forEach((r, index) => {
+                    mdContent += `${index + 1}. **${r.question}**\n`;
+                    mdContent += `   - You answered: ${r.userAnswer}\n`;
+                    mdContent += `   - Correct: ${r.correctAnswer}\n`;
+                    if (r.explanation) {
+                        mdContent += `   - Why: ${r.explanation}\n`;
+                    }
+                    mdContent += `\n`;
+                });
+            }
+
+            const blob = new Blob([mdContent], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `quiz_results_${date}.md`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

@@ -72,7 +72,7 @@ status: [complete | in-progress | blocked]
 After creating the handoff, respond with:
 
 ```
-Handoff created! Resume in a new session by pointing the agent at:
+Handoff created! Resume in a new session with the resume-handoff skill:
 
 handoffs/[filename].md
 ```
